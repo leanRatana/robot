@@ -1,0 +1,573 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot" >
+
+
+<!-- property of base -->
+<xacro:property name="base_link_size_x" value="0.2"/>
+<xacro:property name="base_link_size_y" value="0.14"/>
+<xacro:property name="base_link_size_z" value="0.014"/>
+
+<xacro:property name="box_size_x" value="0.028"/>
+<xacro:property name="box_size_y" value="0.028"/>
+<xacro:property name="box_size_z" value="0.08"/>
+<xacro:property name="box_joint_x" value="0.09"/>
+<xacro:property name="box_joint_z" value="0.045"/>
+
+
+<xacro:property name="wheel_rpy_p" value="1.57"/>
+<xacro:property name="wheel_rpy_y" value="1.57"/>
+<xacro:property name="wheel_length" value="0.02"/>
+<xacro:property name="wheel_radius" value="0.04"/>
+<xacro:property name="wheel_joint_x" value="0.095"/>
+<xacro:property name="wheel_joint_y" value="0.09"/>
+
+<!--<xacro:property name="motor_rpy_p" value="1.57"/>
+<xacro:property name="motor_rpy_y" value="1.57"/>
+<xacro:property name="motor_length" value="0.01"/>
+<xacro:property name="motor_radius" value="0.005"/>
+<xacro:property name="motor_joint_x" value="0.095"/>
+<xacro:property name="motor_joint_y" value="0.075"/> -->
+
+<xacro:property name="axis" value="1"/>
+<xacro:property name="effort" value="300"/>
+<xacro:property name="velocity" value="0.5"/>
+<xacro:property name="lower" value="-3.14"/>
+<xacro:property name="upper" value="3.14"/>
+<!-- inertial box-->
+<xacro:property name="mass_base" value="10"/>
+<xacro:property name="I_base_xx" value="0.016"/>
+<xacro:property name="I_base_yy" value="0.033"/>
+<xacro:property name="I_base_zz" value="0.049"/>
+<!-- inertial square-->
+<xacro:property name="mass_square" value="1"/>
+<xacro:property name="I_square_xx" value="0.00013"/>
+<xacro:property name="I_square_yy" value="0.00013"/>
+<xacro:property name="I_square_zz" value="0.00013"/>
+<!-- inertial cylinder-->
+<xacro:property name="mass_wheel" value="5"/>
+<xacro:property name="I_wheel_xx" value="0.0021"/>
+<xacro:property name="I_wheel_yy" value="0.004"/>
+<xacro:property name="I_wheel_zz" value="0.0021"/>
+
+<!-- inertial motor -->
+<xacro:property name="mass_motor" value="1"/>
+<xacro:property name="I_motor_xx" value="0.000014"/>
+<xacro:property name="I_motor_yy" value="0.000012"/>
+<xacro:property name="I_motor_zz" value="0.000014"/>
+
+<!-- color in rviz-->
+    <material name="blue">
+      <color rgba="0 0 0.8 1"/>
+    </material>
+    <material name="pink">
+      <color rgba="1 0 0.5 1"/>
+    </material>    
+    <material name="green">
+      <color rgba="0 1 0.5 1"/>
+    </material>
+
+<link name="dummy">
+
+</link>
+
+<joint name="dummy_base_link" type="fixed">
+	<parent link="dummy"/>
+	<child link="base_link"/>
+</joint>
+
+
+<link name="base_link">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="${base_link_size_x} ${base_link_size_y} ${base_link_size_z}"/>
+		</geometry>
+			    <material name="blue"/>
+	</visual>
+	<collision>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="${base_link_size_x} ${base_link_size_y} ${base_link_size_z}"/>
+		</geometry>
+			    <material name="blue"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_base}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_base_xx}" ixy="0" ixz="0" iyy="${I_base_yy}" iyz="0" izz="${I_base_zz}"/>
+	</inertial>
+
+</link>
+
+<link name="box">
+   <visual>
+     <origin rpy="0 0 0" xyz="0 0 0.02"/>
+       <geometry> 
+         <box size="0.1 0.1 0.05"/>
+       </geometry>
+     </visual> 
+<collision>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="0.1 0.1 0.05"/>
+		</geometry>
+
+
+</collision>
+	<inertial>
+		<mass value="${mass_square}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_square_xx}" ixy="0" ixz="0" iyy="${I_square_yy}" iyz="0" izz="${I_square_zz}"/>
+	</inertial>
+</link>
+
+<link name="laser_scan">
+	<visual>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="${box_size_x} ${box_size_y} ${box_size_z}"/>
+		</geometry>
+			  
+	</visual>
+	<collision>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="${box_size_x} ${box_size_y} ${box_size_z}"/>
+		</geometry>
+			  
+	</collision>
+	<inertial>
+		<mass value="${mass_square}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_square_xx}" ixy="0" ixz="0" iyy="${I_square_yy}" iyz="0" izz="${I_square_zz}"/>
+	</inertial>
+</link>
+
+
+
+<link name="wheel_1">
+	<visual>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_wheel}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+	</inertial>
+</link>
+<link name="wheel_2">
+	<visual>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_wheel}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+	</inertial>
+</link>
+<link name="wheel_3">
+	<visual>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_wheel}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+	</inertial>
+</link>
+<link name="wheel_4">
+	<visual>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${wheel_rpy_p} ${wheel_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+		</geometry>
+			<material name="pink"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_wheel}"/>
+
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+	</inertial>
+</link>
+
+
+
+<!-- <link name="motor_1">
+	<visual>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_motor}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_motor_xx}" ixy="0" ixz="0" iyy="${I_motor_yy}" iyz="0" izz="${I_motor_zz}"/>
+	</inertial>
+</link>
+<link name="motor_2">
+	<visual>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_motor}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_motor_xx}" ixy="0" ixz="0" iyy="${I_motor_yy}" iyz="0" izz="${I_motor_zz}"/>
+	</inertial>
+</link>
+<link name="motor_3">
+	<visual>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_motor}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_motor_xx}" ixy="0" ixz="0" iyy="${I_motor_yy}" iyz="0" izz="${I_motor_zz}"/>
+	</inertial>
+</link>
+<link name="motor_4">
+	<visual>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</visual>
+	<collision>
+		<origin rpy="0 ${motor_rpy_p} ${motor_rpy_y}" xyz="0 0 0"/>
+		<geometry>
+			<cylinder length="${motor_length}" radius="${motor_radius}"/>
+		</geometry>
+    			<material name="green"/>
+	</collision>
+	<inertial>
+		<mass value="${mass_motor}"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="${I_motor_xx}" ixy="0" ixz="0" iyy="${I_motor_yy}" iyz="0" izz="${I_motor_zz}"/>
+	</inertial>
+</link> -->
+
+<joint name="box" type="fixed">
+       <origin xyz="0 0 0"/>
+       <parent link="base_link"/>
+       <child link="box"/>
+       <axis xyz="${axis} 0 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+
+<joint name="laser_scan" type="fixed">
+	<origin xyz="0 0 ${box_joint_z}"/>
+	<parent link="box"/>
+	<child link="laser_scan"/>
+	<axis xyz="${axis} 0 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+
+<joint name="base_wheel_1" type="continuous">
+	<origin xyz="${wheel_joint_x} ${wheel_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="wheel_1"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_wheel_2" type="continuous">
+	<origin xyz="-${wheel_joint_x} ${wheel_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="wheel_2"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_wheel_3" type="continuous">
+	<origin xyz="-${wheel_joint_x} -${wheel_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="wheel_3"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_wheel_4" type="continuous">
+	<origin xyz="${wheel_joint_x} -${wheel_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="wheel_4"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+
+
+<!--<joint name="base_motor_1" type="continuous">
+	<origin xyz="${motor_joint_x} ${motor_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="motor_1"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_motor_2" type="continuous">
+	<origin xyz="-${motor_joint_x} ${motor_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="motor_2"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_motor_3" type="continuous">
+	<origin xyz="-${motor_joint_x} -${motor_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="motor_3"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint>
+<joint name="base_motor_4" type="continuous">
+	<origin xyz="${motor_joint_x} -${motor_joint_y} 0"/>
+	<parent link="base_link"/>
+	<child link="motor_4"/>
+	<axis xyz="0 ${axis} 0"/>
+	<limit effort="${effort}" velocity="${velocity}" lower="${lower}" upper="${upper}"/>
+</joint> -->
+
+<!-- camera_scan-->
+<link name="camera_scan">
+	<visual>
+	<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="0.05 0.05 0.03"/>
+		</geometry>
+	</visual>
+</link>
+<joint name="base_link_camera_scan" type="fixed">
+	<origin xyz="0.0 0.0 0.08"/>
+	<parent link="box"/>
+	<child link="camera_scan"/>
+</joint> 
+
+<!-- imu_link-->
+<link name="imu_scan">
+	<visual>
+	<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<box size="0.1 0.1 0.06"/>		
+		</geometry>	
+	</visual>
+</link>
+<joint name="base_link_IMU_scan" type="fixed">
+	<origin xyz="0 0 0.02"/>
+	<parent link="base_link"/>
+	<child link="imu_scan"/>
+</joint> 
+
+<!-- gazebo_view-->
+<gazebo reference="base_link">
+	<material>Gazebo/Black</material>
+	<turnGravityOff>false</turnGravityOff>
+</gazebo>
+
+<!-- color in gazebo -->
+<gazebo reference="base_link">
+	<material>Gazebo/Black</material>
+	<turnGravityOff>false</turnGravityOff>
+</gazebo>
+<gazebo>
+	<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+		<robotNameSpace>/</robotNameSpace>
+		<commandTopic>cmd_vel</commandTopic>
+		<odometryTopic>odom</odometryTopic>
+		<odometryFrame>odom</odometryFrame>
+		<robotBaseFrame>base_link</robotBaseFrame>
+		<publishWheelTF>false</publishWheelTF>
+		<publishOdomTF>true</publishOdomTF>
+		<publishWheelJointState>false</publishWheelJointState>
+		<legacyMode>true</legacyMode>
+		
+		<wheelSeparation>${2*base_link_size_y}</wheelSeparation>
+		<wheelDiameter>${2*wheel_radius}</wheelDiameter>
+		<wheelAcceleration>1.0</wheelAcceleration>
+		<wheelTorque>20.0</wheelTorque>
+		<updateRate>10.0</updateRate>
+		<leftJoint>base_wheel_1</leftJoint>
+		<leftJoint>base_wheel_2</leftJoint>
+		<rightJoint>base_wheel_3</rightJoint>
+		<rightJoint>base_wheel_4</rightJoint>
+	</plugin>
+</gazebo>
+
+<gazebo reference="laser_scan">
+	<material>Gazebo/Red</material>
+	<turnGravityOff>true</turnGravityOff>
+	<sensor type="ray" name="laser_scan_sensor">
+		<pose> 0 0 0 0 0 0 </pose>
+		<visualize>true</visualize>
+		<update_rate>10.0</update_rate>
+		<ray>
+		<scan>
+			<horizontal>
+				<sample>500</sample>
+				<resolution>1</resolution>
+				<min_angle>-1.57</min_angle>
+				<max_angle>1.57</max_angle>
+			</horizontal>
+		</scan>
+		<range>
+			<min>0.1</min>
+			<max>10</max>
+			<resolution>1</resolution>
+		</range>
+		</ray>
+			
+
+	<plugin name="laser_scanner" filename="libgazebo_ros_laser.so">
+		<topicName>/scan</topicName>
+		<frameName>laser_scan</frameName>
+	</plugin>
+	</sensor>
+</gazebo>
+
+<!-- camera plugin -->
+  <gazebo reference="camera_scan">
+  	<material>Gazebo/Green</material>
+	<turnGravityOff>true</turnGravityOff>
+    <sensor type="camera" name="camera1">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera1</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_scan</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+<!-- camera plugin 
+<gazebo>
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>imu_scan</bodyName>
+      <topicName>imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>20.0</updateRate>
+    </plugin>
+</gazebo>-->
+
+<gazebo reference="imu_scan">
+ <material>Gazebo/Yellow</material>
+ <turnGravityOff>true</turnGravityOff>
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin name="imu_plugin" filename="liboxbgazebo_ros_imu_sensor.so" >
+        <topicName>imu</topicName>
+        <bodyName>imu_scan</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_scan</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo> 
+  
+</robot>
+
+
